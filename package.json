@@ -1,0 +1,7 @@
+{
+  "name": "7tv-api-wrapper",
+  "version": "0.0.1",
+  "description": "7TV Api Wrapper",
+  "main": "index.js",
+  "license": "MIT"
+}
