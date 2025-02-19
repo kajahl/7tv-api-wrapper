@@ -15,4 +15,17 @@ export default class ApiService {
         return data.user;
     }
 
+    async get7TVUserBy7TvId(sevenTvUserId: string): Promise<SevenTVUser | null> {
+        try {
+            const response = await axios.get<SevenTVUser>(`https://7tv.io/v3/users/${sevenTvUserId}`);
+            if (response.status !== 200) {
+                console.error(`Error fetching 7TV user by ID ${sevenTvUserId}: ${response.statusText}`);
+                return null;
+            }
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching 7TV user by ID ${sevenTvUserId}:`, error);
+            return null;
+        }
+    }
 }
