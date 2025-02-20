@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { UserRoles } from '../types/7tv/gql.types';
+import { PlatformType } from '../types/7tv/types';
 
 export default class GraphQLService {
     constructor(private token: string) {}
@@ -18,7 +19,7 @@ export default class GraphQLService {
                 },
             }
         );
-        
+
         if (response.data.errors) {
             const errorMessages = response.data.errors.map((error: any) => error.message).join('\n');
             throw new Error(errorMessages);
@@ -47,13 +48,32 @@ export default class GraphQLService {
                     }
                 }
             }`;
-        
-        return this.query(query).then(data => {
-            return data.users.user.roleIds;
-        }).catch(err => {
-            console.log(err);
-            return null;
-        });
+
+        return this.query(query)
+            .then((data) => {
+                return data.users.user.roleIds;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
     }
-    
+
+    async getUserIdByPlatform(userId: string, platform: PlatformType): Promise<string | null> {
+        const query = `query Users {
+                  users {
+                      userByConnection(platform: ${platform}, platformId: "${userId}") {
+                          id
+                      }
+                  }
+              }`;
+        return this.query(query)
+            .then((data) => {
+                return data.users.userByConnection.id;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
+    }
 }

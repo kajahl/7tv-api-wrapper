@@ -40,3 +40,10 @@ export interface Get7TVUserByTwitchIdResponse {
     emote_set: EmoteSet;
     user: SevenTVUser;
 }
+
+export enum PlatformType {
+  Twitch = "TWITCH",
+  Kick = "KICK",
+  Google = "GOOGLE",
+  Discord = "DISCORD"
+}
