@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { UserRoles } from '../types/7tv/gql.types';
+import { UserBadge, UserPaint, UserRoles } from '../types/7tv/gql.types';
 import { PlatformType } from '../types/7tv/types';
 
 export default class GraphQLService {
@@ -70,6 +70,64 @@ export default class GraphQLService {
         return this.query(query)
             .then((data) => {
                 return data.users.userByConnection.id;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
+    }
+
+    async UserGetPaint(userId: string): Promise<UserPaint | null> {
+        const query = `
+        query Users {
+          users {
+              user(id: "${userId}") {
+                  style {
+                      activePaint {
+                          id
+                          name
+                          description
+                          tags
+                          createdById
+                          updatedAt
+                          searchUpdatedAt
+                      }
+                  }
+              }
+          }
+      }`;
+        return this.query(query)
+            .then((data) => {
+                return data.users.user.style.activePaint;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
+    }
+
+    async UserGetBadge(userId: string): Promise<UserBadge | null> {
+        const query = `
+      query Users {
+        users {
+            user(id: "${userId}") {
+                style {
+                    activeBadge {
+                        id
+                        name
+                        description
+                        tags
+                        createdById
+                        updatedAt
+                        searchUpdatedAt
+                    }
+                }
+            }
+        }
+    }`;
+        return this.query(query)
+            .then((data) => {
+                return data.users.user.style.activeBadge;
             })
             .catch((err) => {
                 console.log(err);
