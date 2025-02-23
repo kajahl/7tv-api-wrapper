@@ -47,3 +47,12 @@ export enum PlatformType {
   Google = "GOOGLE",
   Discord = "DISCORD"
 }
+
+export enum GetEmotesMethod {
+  Author = "Author",
+  Name = "Name",
+}
+export enum GetEmoteMethod {
+  EmoteId = "EmoteId",
+  Name = "Name",
+}

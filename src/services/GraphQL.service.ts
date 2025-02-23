@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { UserBadge, UserPaint, UserRoles } from '../types/7tv/gql.types';
-import { PlatformType } from '../types/7tv/types';
+import { UserBadge, UserPaint, UserRoles, EmoteData, EmotesData, AddEmoteData } from '../types/7tv/gql.types';
+import { PlatformType, GetEmotesMethod, GetEmoteMethod } from '../types/7tv/types';
 
 export default class GraphQLService {
     constructor(private token: string) {}
@@ -128,6 +128,195 @@ export default class GraphQLService {
         return this.query(query)
             .then((data) => {
                 return data.users.user.style.activeBadge;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
+    }
+
+    async GetEmotesByAuthor(author: string): Promise<EmotesData | null> {
+        const query = `
+          query Users {
+              users {
+                  user(id: "${author}") {
+                      ownedEmotes {
+                          id
+                          ownerId
+                          defaultName
+                          tags
+                          imagesPending
+                          aspectRatio
+                          deleted
+                          updatedAt
+                          searchUpdatedAt
+                      }
+                  }
+              }
+          }`;
+
+        return this.query(query)
+            .then((data) => {
+                return data.users.user.ownedEmotes;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
+    }
+
+    async GetEmotesByName(emoteName: string): Promise<EmotesData | null> {
+        const query = `
+      query Emotes {
+        emotes {
+            search(query: "${emoteName}", sort: { order: DESCENDING, sortBy: TOP_ALL_TIME }) {
+                totalCount
+                pageCount
+                items {
+                    id
+                    ownerId
+                    defaultName
+                    tags
+                    imagesPending
+                    aspectRatio
+                    deleted
+                    updatedAt
+                    searchUpdatedAt
+                }
+            }
+        }
+    }`;
+
+        return this.query(query)
+            .then((data) => {
+                return data.users.user.ownedEmotes;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
+    }
+
+    async GetEmotesBy(method: GetEmotesMethod, param: string): Promise<EmotesData | null> {
+        if (method === GetEmotesMethod.Author) return this.GetEmotesByAuthor(param);
+        if (method === GetEmotesMethod.Name) return this.GetEmotesByName(param);
+        throw new Error('Method not found');
+    }
+
+    async GetEmoteBy(method: GetEmoteMethod, param: string): Promise<EmoteData | null> {
+        if (method === GetEmoteMethod.EmoteId) return this.GetEmoteById(param);
+        if (method === GetEmoteMethod.Name) return this.GetEmoteByName(param);
+        throw new Error('Method not found');
+    }
+
+    async GetEmoteById(emoteId: string): Promise<EmotesData | null> {
+      const query = `
+        query Emotes {
+            emotes {
+                emote(id: "${emoteId}") {
+                    id
+                    ownerId
+                    defaultName
+                    tags
+                    imagesPending
+                    aspectRatio
+                    deleted
+                    updatedAt
+                    searchUpdatedAt
+                }
+            }
+        }`;
+
+      return this.query(query)
+          .then((data) => {
+            return data.emotes.emote;
+          })
+          .catch((err) => {
+              console.log(err);
+              return null;
+          });
+  }
+    async GetEmoteByName(emoteName: string): Promise<EmotesData | null> {
+      const query = `
+      query Emotes {
+          emotes {
+              search(query: "${emoteName}", sort: { order: DESCENDING, sortBy: TOP_ALL_TIME }) {
+                  totalCount
+                  pageCount
+                  items {
+                      id
+                      ownerId
+                      defaultName
+                      tags
+                      imagesPending
+                      aspectRatio
+                      deleted
+                      updatedAt
+                      searchUpdatedAt
+                  }
+              }
+          }
+      }`;
+
+      return this.query(query)
+          .then((data) => {
+            return data.emotes.search.items[0];
+          })
+          .catch((err) => {
+              console.log(err);
+              return null;
+          });
+  }
+
+    async GetActiveEmoteSet(UserId: string): Promise<EmotesData | null> {
+        const query = `
+    query Users {
+        users {
+            user(id: "${UserId}") {
+                style {
+                    activeEmoteSetId
+                }
+            }
+        }
+    }`;
+
+        return this.query(query)
+            .then((data) => {
+                return data.users.user.style.activeEmoteSetId;
+            })
+            .catch((err) => {
+                console.log(err);
+                return null;
+            });
+    }
+
+    async AddEmoteToSet(SetId: string, EmoteId: string): Promise<AddEmoteData | null> {
+        const query = `
+          mutation EmoteSets {
+            emoteSets {
+                emoteSet(id: "${SetId}") {
+                    addEmote(
+                        id: { emoteId: "${EmoteId}" }
+                        zeroWidth: false
+                        overrideConflicts: false
+                    ) {
+                        id
+                        name
+                        tags
+                        capacity
+                        ownerId
+                        kind
+                        updatedAt
+                        searchUpdatedAt
+                        description
+                    }
+                }
+            }
+        } `;
+
+        return this.query(query)
+            .then((data) => {
+                return data;
             })
             .catch((err) => {
                 console.log(err);
